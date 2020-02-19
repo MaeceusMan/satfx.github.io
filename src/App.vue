@@ -1,32 +1,59 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
+    <div id="app">
+        <Nav :user="user" @logout="logout" />
+        <router-view :user="user" @logout="logout" />
     </div>
-    <router-view/>
-  </div>
 </template>
+<script>
+    import Nav from './components/partials/Nav.vue';
+    const fb = require('./auth/index.js');
+    import Firebase from "firebase";
+    // import index from "./auth/index.js";
 
+    export default {
+        name: 'app',
+        data: function () {
+            return {
+                user: null
+            };
+        },
+        methods: {
+            logout: function () {
+                Firebase.auth()
+                    .signOut()
+                    .then(() => {
+                        this.user = null;
+                        this.$router.push("/login");
+                    });
+            }
+        },
+        mounted() {
+            fb.auth.onAuthStateChanged(user => {
+                if (user) {
+                    this.user = user;
+                }
+            })
+            // Old Pull data, keeping for now in case I need it to pull API info
+            /*index.collection("users")
+                .doc("kVFy3N7iDxNf8iFjox9V")
+                .get()
+                .then(snapshot => {
+                    this.user = snapshot.data().name;
+                });*/
+        },
+        components: {
+            Nav
+        }
+    };
+</script>
 <style lang="scss">
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
+    @import "node_modules/bootstrap/scss/bootstrap";
 
-#nav {
-  padding: 30px;
-
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-
-    &.router-link-exact-active {
-      color: #42b983;
+    #app {
+        font-family: 'Avenir', Helvetica, Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-align: center;
+        color: #2c3e50;
     }
-  }
-}
 </style>
